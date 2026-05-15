@@ -1,28 +1,48 @@
-(define-fun nonNegative ((s Int)) Bool
-  (>= s 0)
+; Utility Functions for definiting rewrites
+(define-fun zeroArr () (Array Int Int)
+  ((as const (Array Int Int)) 0)
+)
+
+(define-fun oneArr () (Array Int Int)
+  ((as const (Array Int Int)) 1)
+)
+
+; Asserts that all elements of the array are equal to a constant value
+(define-fun constPre ((a (Array Int Int)) (v Int)) Bool
+  (=
+    a
+    ((as const (Array Int Int)) v)
+  )
+)
+
+; Asserts that all elements of the array are less than or equal to elements of another array
+(define-fun leqPre ((a (Array Int Int)) (b (Array Int Int))) Bool
+  (=
+    ((_ map (<= (Int Int) Int)) a b)
+    ((as const (Array Int Bool)) true)
+  )
+)
+
+; Asserts that all elements of the array are less than elements of another array
+(define-fun ltPre ((a (Array Int Int)) (b (Array Int Int))) Bool
+  (=
+    ((_ map (< (Int Int) Int)) a b)
+    ((as const (Array Int Bool)) true)
+  )
 )
 
 (define-fun validShape ((s (Array Int Int))) Bool
-  (= 
-    ((_ map nonNegative) s)
-    ((as const (Array Int Bool)) true)
-  )
-)
-
-(define-fun inRange ((a Int) (s Int)) Bool
-  (and
-    (>= a 0)
-    (< a s)
-  )
+  (leqPre zeroArr s)
 )
 
 (define-fun validAccess ((a (Array Int Int)) (s (Array Int Int))) Bool
-  (=
-    ((_ map inRange) a s)
-    ((as const (Array Int Bool)) true)
+  (and
+    (leqPre zeroArr a)
+    (ltPre a s)
   )
 )
 
+;; Rewrites involving Tensor Comparison
 (push)
   (echo "Verifying Gt(A, A) => False")
   (declare-const s (Array Int Int))
