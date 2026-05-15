@@ -1,0 +1,412 @@
+; Utility Functions for defining rewrites
+(define-fun zeroArr () (Array Int Int)
+  ((as const (Array Int Int)) 0)
+)
+
+(define-fun oneArr () (Array Int Int)
+  ((as const (Array Int Int)) 1)
+)
+
+(define-fun twoArr () (Array Int Int)
+  ((as const (Array Int Int)) 2)
+)
+
+; Asserts that all elements of the array are equal to a constant value
+(define-fun constPre ((a (Array Int Int)) (v Int)) Bool
+  (=
+    a
+    ((as const (Array Int Int)) v)
+  )
+)
+
+; Asserts that all elements of the array are less than or equal to elements of another array
+(define-fun leqPre ((a (Array Int Int)) (b (Array Int Int))) Bool
+  (=
+    ((_ map (<= (Int Int) Int)) a b)
+    ((as const (Array Int Bool)) true)
+  )
+)
+
+; Asserts that all elements of the array are less than elements of another array
+(define-fun ltPre ((a (Array Int Int)) (b (Array Int Int))) Bool
+  (=
+    ((_ map (< (Int Int) Int)) a b)
+    ((as const (Array Int Bool)) true)
+  )
+)
+
+(define-fun validShape ((s (Array Int Int))) Bool
+  (leqPre zeroArr s)
+)
+
+(define-fun validAccess ((a (Array Int Int)) (s (Array Int Int))) Bool
+  (and
+    (leqPre zeroArr a)
+    (ltPre a s)
+  )
+)
+
+; Division with a default value for division by zero
+(define-fun divOr ((a Int) (b Int) (d Int)) Int
+  (ite
+    (= b 0)
+    d
+    (div a b)
+  )
+)
+
+; Modulo with a default value for division by zero
+(define-fun modOr ((a Int) (b Int) (d Int)) Int
+  (ite
+    (= b 0)
+    d
+    (mod a b)
+  )
+)
+
+; Ceiling division defined in terms of divOr and modOr
+(define-fun ceilingDiv ((a Int) (b Int)) Int
+  (ite
+    (= (modOr a b 0) 0)
+    (divOr a b 0)
+    (+ (divOr a b 0) 1)
+  )
+)
+
+; Ceiling division defined in terms of divOr only
+(define-fun safeCeil ((a Int) (b Int)) Int
+  (divOr
+    (+ a (- b 1))
+    b
+    0
+  )
+)
+
+; Slice access function: computes the input access index corresponding to a given output access
+(define-fun sliceAcc ((a Int) (s Int) (p Int)) Int
+  (+ s (* p a))
+)
+
+; Slice shape function: computes the output shape given the input shape and slice parameters
+(define-fun sliceShape ((s Int) (e Int) (p Int)) Int
+  (ceilingDiv
+    (- e s)
+    p
+  )
+)
+
+(push)
+  (echo "Checking ceiling definition: ceilingDiv(a, b) = safeCeil(a, b) for a >= 0 and b > 0")
+  (declare-const a Int)
+  (declare-const b Int)
+  (assert
+    (and
+      (>= a 0)
+      (> b 0)
+      (not
+        (= (ceilingDiv a b) (safeCeil a b))
+      )
+    )
+  )
+  (check-sat)
+(pop)
+
+;; Rewrites involving Tensor Slicing
+(push)
+  (echo "Verifying Slice(A) => A")
+  (declare-const sz (Array Int Int)) ; Tensor size
+  (declare-const s (Array Int Int))  ; Slice start
+  (declare-const e (Array Int Int))  ; Slice end
+  (declare-const p (Array Int Int))  ; Slice stride
+  (declare-const a (Array Int Int))  ; Tensor Access
+  (declare-fun tA ((Array Int Int)) Real)
+
+  (define-fun lhsShape () (Array Int Int)
+    ((_ map sliceShape) s e p)
+  )
+
+  (define-fun rhsShape () (Array Int Int)
+    sz
+  )
+
+  (define-fun precondition () Bool
+    (and
+      (= s zeroArr)
+      (= e sz)
+      (= p oneArr)
+    )
+  )
+
+  (define-fun lhsValid () Bool
+    (and
+      (validShape sz)
+      (leqPre zeroArr s)
+      (leqPre s e)
+      (leqPre e sz)
+      (ltPre zeroArr p)
+      (validShape lhsShape)
+    )
+  )
+
+  (define-fun lhsAccessValid () Bool
+    (and
+      (validAccess a lhsShape)
+      (validAccess ((_ map sliceAcc) a s p) sz)
+    )
+  )
+
+  (define-fun rhsValid () Bool
+    (validShape rhsShape)
+  )
+
+  (define-fun rhsAccessValid () Bool
+    (validAccess a rhsShape)
+  )
+
+  (define-fun rewriteValid () Bool
+    (= (tA ((_ map sliceAcc) a s p)) (tA a))
+  )
+
+  (define-fun phi () Bool
+    (=>
+      (and
+        precondition
+        lhsValid
+        lhsAccessValid
+      )
+      (and
+        (= lhsShape rhsShape)
+        rhsValid
+        rhsAccessValid
+        rewriteValid
+      )
+    )
+  )
+  (assert (not phi))
+  (check-sat)
+(pop)
+
+(push)
+  (echo "Verifying TensorRight Motivating Example: Valid for 1D case but invalid for higher dimensions")
+  (declare-const sz (Array Int Int)) ; Tensor size
+  (declare-const s (Array Int Int))  ; Slice start
+  (declare-const e (Array Int Int))  ; Slice end
+  (declare-const pLhs (Array Int Int))  ; Slice stride for LHS
+  (declare-const pRhs (Array Int Int))  ; Slice stride for RHS
+  (declare-const offset (Array Int Int))  ; Dynamic Update Slice update offset
+  (declare-const a (Array Int Int))  ; Tensor Access
+  (declare-fun tA ((Array Int Int)) Real)
+
+  (define-fun midPoint ((sz Int)) Int
+    (divOr (+ sz 1) 2 0)
+  )
+
+  (define-fun lhsShape () (Array Int Int)
+    ((_ map sliceShape) s e pLhs)
+  )
+
+  (define-fun rhsShape () (Array Int Int)
+    ((_ map sliceShape) s sz pRhs)
+  )
+
+  (define-fun precondition () Bool
+    (and
+      (= s zeroArr)
+      (= e ((_ map midPoint) sz))
+      (= pLhs oneArr)
+      (= pRhs twoArr)
+    )
+  )
+
+  (define-fun lhsValid () Bool
+    (and
+      (validShape sz)
+      (leqPre zeroArr s)
+      (leqPre s e)
+      (leqPre e sz)
+      (ltPre zeroArr pLhs)
+      (validShape lhsShape)
+      (leqPre zeroArr offset)
+    )
+  )
+
+  (define-fun lhsAccessValid () Bool
+    (and
+      (validAccess a lhsShape)
+      (=> (not (leqPre offset a)) (validAccess a lhsShape))
+      (=> (not (leqPre offset a)) (validAccess ((_ map sliceAcc) a s pLhs) sz))
+    )
+  )
+
+  (define-fun rhsValid () Bool
+    (and
+      (validShape sz)
+      (leqPre zeroArr s)
+      (leqPre s e)
+      (leqPre e sz)
+      (ltPre zeroArr pRhs)
+      (validShape rhsShape)
+      (leqPre zeroArr offset)
+    )
+  )
+
+  (define-fun rhsAccessValid () Bool
+    (and
+      (validAccess a rhsShape)
+      (=> (not (leqPre offset a)) (validAccess a rhsShape))
+      (=> (not (leqPre offset a)) (validAccess ((_ map sliceAcc) a s pRhs) sz))
+    )
+  )
+
+  (define-fun rewriteValid () Bool
+    (=
+      (ite (leqPre oneArr a) 0 (tA ((_ map sliceAcc) a s pLhs)))
+      (ite (leqPre oneArr a) 0 (tA ((_ map sliceAcc) a s pRhs)))
+    )
+  )
+
+  (define-fun phi () Bool
+    (=>
+      (and
+        precondition
+        lhsValid
+        lhsAccessValid
+      )
+      (and
+        (= lhsShape rhsShape)
+        rhsValid
+        rhsAccessValid
+        rewriteValid
+      )
+    )
+  )
+
+  (assert (not phi))
+  (check-sat)
+  ; (get-model)
+(pop)
+
+(push)
+  (echo "Verifying TensorRight Motivating Example: Valid for 1D case")
+  (declare-const sz Int) ; Tensor size
+  (declare-const s Int)  ; Slice start
+  (declare-const e Int)  ; Slice end
+  (declare-const pLhs Int)  ; Slice stride for LHS
+  (declare-const pRhs Int)  ; Slice stride for RHS
+  (declare-const offset Int)  ; Dynamic Update Slice update offset
+  (declare-const a Int)  ; Tensor Access
+  (declare-fun tA ((Int)) Real)
+
+  (define-fun midPoint ((sz Int)) Int
+    (divOr (+ sz 1) 2 0)
+  )
+
+  (define-fun lhsShape () Int
+    (sliceShape s e pLhs)
+  )
+
+  (define-fun rhsShape () Int
+    (sliceShape s sz pRhs)
+  )
+
+  (define-fun precondition () Bool
+    (and
+      (= s 0)
+      (= e (midPoint sz))
+      (= pLhs 1)
+      (= pRhs 2)
+    )
+  )
+
+  (define-fun lhsValid () Bool
+    (and
+      (<= 0 sz)
+      (<= 0 s)
+      (<= s e)
+      (<= e sz)
+      (< 0 pLhs)
+      (<= 0 lhsShape)
+      (<= 0 offset)
+    )
+  )
+
+  (define-fun lhsAccessValid () Bool
+    (and
+      (<= 0 a)
+      (< a lhsShape)
+      (=>
+        (not (<= offset a))
+        (and
+          (<= 0 a)
+          (< a lhsShape)
+        )
+      )
+      (=>
+        (not (<= offset a))
+        (and
+          (<= 0 (sliceAcc a s pLhs))
+          (< (sliceAcc a s pLhs) sz)
+        )
+      )
+    )
+  )
+
+  (define-fun rhsValid () Bool
+    (and
+      (<= 0 sz)
+      (<= 0 s)
+      (<= s e)
+      (<= e sz)
+      (< 0 pRhs)
+      (<= 0 rhsShape)
+      (<= 0 offset)
+    )
+  )
+
+  (define-fun rhsAccessValid () Bool
+    (and
+      (<= 0 a)
+      (< a rhsShape)
+      (=>
+        (not (<= offset a))
+        (and
+          (<= 0 a)
+          (< a rhsShape)
+        )
+      )
+      (=>
+        (not (<= offset a))
+        (and
+          (<= 0 (sliceAcc a s pRhs))
+          (< (sliceAcc a s pRhs) sz)
+        )
+      )
+    )
+  )
+
+  (define-fun rewriteValid () Bool
+    (=
+      (ite (<= 1 a) 0 (tA (sliceAcc a s pLhs)))
+      (ite (<= 1 a) 0 (tA (sliceAcc a s pRhs)))
+    )
+  )
+
+  (define-fun phi () Bool
+    (=>
+      (and
+        precondition
+        lhsValid
+        lhsAccessValid
+      )
+      (and
+        (= lhsShape rhsShape)
+        rhsValid
+        rhsAccessValid
+        rewriteValid
+      )
+    )
+  )
+
+  (assert (not phi))
+  (check-sat)
+(pop)
