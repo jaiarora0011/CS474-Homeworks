@@ -54,23 +54,64 @@
   (declare-const s (Array Int Int))
   (declare-const a (Array Int Int))
   (declare-fun tA ((Array Int Int)) Real)
+
+  (define-fun lhsShape () (Array Int Int)
+    s
+  )
+
+  (define-fun rhsShape () (Array Int Int)
+    s
+  )
+
+  (define-fun precondition () Bool
+    true
+  )
+
+  (define-fun lhsValid () Bool
+    (validShape lhsShape)
+  )
+
+  (define-fun lhsAccessValid () Bool
+    (and
+      (validAccess a lhsShape)
+      (validAccess a s)
+    )
+  )
+
+  (define-fun rhsValid () Bool
+    (validShape rhsShape)
+  )
+
+  (define-fun rhsAccessValid () Bool
+    (and
+      (validAccess a rhsShape)
+      (validAccess a s)
+    )
+  )
+
+  (define-fun rewriteValid () Bool
+    (=
+      (+ (+ (tA a) c1) c2)
+      (+ (tA a) (+ c1 c2))
+    )
+  )
+
   (define-fun phi () Bool
     (=>
-      (validShape s)
-      (=>
-        (validAccess a s)
-        (and
-          (= s s)
-          (validShape s)
-          (validAccess a s)
-          (=
-            (+ (+ (tA a) c1) c2)
-            (+ (tA a) (+ c1 c2))
-          )
-        )
+      (and
+        precondition
+        lhsValid
+        lhsAccessValid
+      )
+      (and
+        (= lhsShape rhsShape)
+        rhsValid
+        rhsAccessValid
+        rewriteValid
       )
     )
   )
+
   (assert (not phi))
   (check-sat)
 (pop)
@@ -80,20 +121,58 @@
   (declare-const s (Array Int Int))
   (declare-const a (Array Int Int))
   (declare-fun tA ((Array Int Int)) Real)
+
+  (define-fun lhsShape () (Array Int Int)
+    s
+  )
+
+  (define-fun rhsShape () (Array Int Int)
+    s
+  )
+
+  (define-fun precondition () Bool
+    true
+  )
+
+  (define-fun lhsValid () Bool
+    (validShape lhsShape)
+  )
+
+  (define-fun lhsAccessValid () Bool
+    (and
+      (validAccess a lhsShape)
+      (validAccess a s)
+    )
+  )
+
+  (define-fun rhsValid () Bool
+    (validShape rhsShape)
+  )
+
+  (define-fun rhsAccessValid () Bool
+    (validAccess a rhsShape)
+  )
+
+  (define-fun rewriteValid () Bool
+    (= (+ (tA a) 0) (tA a))
+  )
+
   (define-fun phi () Bool
     (=>
-      (validShape s)
-      (=>
-        (validAccess a s)
-        (and
-          (= s s)
-          (validShape s)
-          (validAccess a s)
-          (= (+ (tA a) 0) (tA a))
-        )
+      (and
+        precondition
+        lhsValid
+        lhsAccessValid
+      )
+      (and
+        (= lhsShape rhsShape)
+        rhsValid
+        rhsAccessValid
+        rewriteValid
       )
     )
   )
+
   (assert (not phi))
   (check-sat)
 (pop)
@@ -103,20 +182,58 @@
   (declare-const s (Array Int Int))
   (declare-const a (Array Int Int))
   (declare-fun tA ((Array Int Int)) Real)
+
+  (define-fun lhsShape () (Array Int Int)
+    s
+  )
+
+  (define-fun rhsShape () (Array Int Int)
+    s
+  )
+
+  (define-fun precondition () Bool
+    true
+  )
+
+  (define-fun lhsValid () Bool
+    (validShape lhsShape)
+  )
+
+  (define-fun lhsAccessValid () Bool
+    (and
+      (validAccess a lhsShape)
+      (validAccess a s)
+    )
+  )
+
+  (define-fun rhsValid () Bool
+    (validShape rhsShape)
+  )
+
+  (define-fun rhsAccessValid () Bool
+    (validAccess a rhsShape)
+  )
+
+  (define-fun rewriteValid () Bool
+    (= (+ 0 (tA a)) (tA a))
+  )
+
   (define-fun phi () Bool
     (=>
-      (validShape s)
-      (=>
-        (validAccess a s)
-        (and
-          (= s s)
-          (validShape s)
-          (validAccess a s)
-          (= (+ 0 (tA a)) (tA a))
-        )
+      (and
+        precondition
+        lhsValid
+        lhsAccessValid
+      )
+      (and
+        (= lhsShape rhsShape)
+        rhsValid
+        rhsAccessValid
+        rewriteValid
       )
     )
   )
+
   (assert (not phi))
   (check-sat)
 (pop)
@@ -127,20 +244,58 @@
   (declare-const s (Array Int Int))
   (declare-const a (Array Int Int))
   (declare-fun tA ((Array Int Int)) Real)
+
+  (define-fun lhsShape () (Array Int Int)
+    s
+  )
+
+  (define-fun rhsShape () (Array Int Int)
+    s
+  )
+
+  (define-fun precondition () Bool
+    true
+  )
+
+  (define-fun lhsValid () Bool
+    (validShape lhsShape)
+  )
+
+  (define-fun lhsAccessValid () Bool
+    (and
+      (validAccess a lhsShape)
+      (validAccess a s)
+    )
+  )
+
+  (define-fun rhsValid () Bool
+    (validShape rhsShape)
+  )
+
+  (define-fun rhsAccessValid () Bool
+    (validAccess a rhsShape)
+  )
+
+  (define-fun rewriteValid () Bool
+    (= (+ c (tA a)) (+ (tA a) c))
+  )
+
   (define-fun phi () Bool
     (=>
-      (validShape s)
-      (=>
-        (validAccess a s)
-        (and
-          (= s s)
-          (validShape s)
-          (validAccess a s)
-          (= (+ c (tA a)) (+ (tA a) c))
-        )
+      (and
+        precondition
+        lhsValid
+        lhsAccessValid
+      )
+      (and
+        (= lhsShape rhsShape)
+        rhsValid
+        rhsAccessValid
+        rewriteValid
       )
     )
   )
+
   (assert (not phi))
   (check-sat)
 (pop)
