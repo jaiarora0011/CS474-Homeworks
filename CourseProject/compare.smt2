@@ -1,10 +1,14 @@
-; Utility Functions for definiting rewrites
+; Utility Functions for defining rewrites
 (define-fun zeroArr () (Array Int Int)
   ((as const (Array Int Int)) 0)
 )
 
 (define-fun oneArr () (Array Int Int)
   ((as const (Array Int Int)) 1)
+)
+
+(define-fun twoArr () (Array Int Int)
+  ((as const (Array Int Int)) 2)
 )
 
 ; Asserts that all elements of the array are equal to a constant value
