@@ -4,20 +4,20 @@
 (declare-sort Dim 0)
 
 ; Utility Functions for defining rewrites
- (define-fun zeroArr () (Array Dim Int)
+(define-fun zeroArr () (Array Dim Int)
   ((as const (Array Dim Int)) 0)
 )
 
- (define-fun oneArr () (Array Dim Int)
+(define-fun oneArr () (Array Dim Int)
   ((as const (Array Dim Int)) 1)
 )
 
- (define-fun twoArr () (Array Dim Int)
+(define-fun twoArr () (Array Dim Int)
   ((as const (Array Dim Int)) 2)
 )
 
 ; Asserts that all elements of the array are equal to a constant value
- (define-fun constPre ((a (Array Dim Int)) (v Int)) Bool
+(define-fun constPre ((a (Array Dim Int)) (v Int)) Bool
   (=
     a
     ((as const (Array Dim Int)) v)
@@ -25,7 +25,7 @@
 )
 
 ; Asserts that all elements of the array are less than or equal to elements of another array
- (define-fun leqPre ((a (Array Dim Int)) (b (Array Dim Int))) Bool
+(define-fun leqPre ((a (Array Dim Int)) (b (Array Dim Int))) Bool
   (=
     ((_ map (<= (Int Int) Int)) a b)
     ((as const (Array Dim Bool)) true)
@@ -33,18 +33,18 @@
 )
 
 ; Asserts that all elements of the array are less than elements of another array
- (define-fun ltPre ((a (Array Dim Int)) (b (Array Dim Int))) Bool
+(define-fun ltPre ((a (Array Dim Int)) (b (Array Dim Int))) Bool
   (=
     ((_ map (< (Int Int) Int)) a b)
     ((as const (Array Dim Bool)) true)
   )
 )
 
- (define-fun validShape ((s (Array Dim Int))) Bool
+(define-fun validShape ((s (Array Dim Int))) Bool
   (leqPre zeroArr s)
 )
 
- (define-fun validAccess ((a (Array Dim Int)) (s (Array Dim Int))) Bool
+(define-fun validAccess ((a (Array Dim Int)) (s (Array Dim Int))) Bool
   (and
     (leqPre zeroArr a)
     (ltPre a s)
