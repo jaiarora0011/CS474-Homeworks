@@ -223,6 +223,7 @@
       (= e ((_ map midPoint) sz))
       (= pLhs oneArr)
       (= pRhs twoArr)
+      (= offset oneArr)
     )
   )
 
@@ -268,8 +269,8 @@
 
   (define-fun rewriteValid () Bool
     (=
-      (ite (leqPre oneArr a) 0 (tA ((_ map sliceAcc) a s pLhs)))
-      (ite (leqPre oneArr a) 0 (tA ((_ map sliceAcc) a s pRhs)))
+      (ite (leqPre offset a) 0 (tA ((_ map sliceAcc) a s pLhs)))
+      (ite (leqPre offset a) 0 (tA ((_ map sliceAcc) a s pRhs)))
     )
   )
 
@@ -325,6 +326,7 @@
       (= e ((_ map midPoint) sz))
       (= pLhs oneArr)
       (= pRhs twoArr)
+      (= offset oneArr)
     )
   )
 
@@ -370,8 +372,8 @@
 
   (define-fun rewriteValid () Bool
     (=
-      (ite (leqPre oneArr a) 0 (tA ((_ map sliceAcc) a s pLhs)))
-      (ite (leqPre oneArr a) 0 (tA ((_ map sliceAcc) a s pRhs)))
+      (ite (leqPre offset a) 0 (tA ((_ map sliceAcc) a s pLhs)))
+      (ite (leqPre offset a) 0 (tA ((_ map sliceAcc) a s pRhs)))
     )
   )
 
