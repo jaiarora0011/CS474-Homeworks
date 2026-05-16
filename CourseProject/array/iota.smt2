@@ -1,45 +1,50 @@
+; Declare a sort for dimension labels, one for each RClass.
+; This allows us to reason about shapes with symbolic dimension labels, instead of integer dimension numbers, which makes the shape arrays unbounded.
+; So all attribute arrays are now of type (Array Dim Int) instead of (Array Int Int).
+(declare-sort Dim 0)
+
 ; Utility Functions for defining rewrites
-(define-fun zeroArr () (Array Int Int)
-  ((as const (Array Int Int)) 0)
+(define-fun zeroArr () (Array Dim Int)
+  ((as const (Array Dim Int)) 0)
 )
 
-(define-fun oneArr () (Array Int Int)
-  ((as const (Array Int Int)) 1)
+ (define-fun oneArr () (Array Dim Int)
+  ((as const (Array Dim Int)) 1)
 )
 
-(define-fun twoArr () (Array Int Int)
-  ((as const (Array Int Int)) 2)
+ (define-fun twoArr () (Array Dim Int)
+  ((as const (Array Dim Int)) 2)
 )
 
 ; Asserts that all elements of the array are equal to a constant value
-(define-fun constPre ((a (Array Int Int)) (v Int)) Bool
+ (define-fun constPre ((a (Array Dim Int)) (v Int)) Bool
   (=
     a
-    ((as const (Array Int Int)) v)
+    ((as const (Array Dim Int)) v)
   )
 )
 
 ; Asserts that all elements of the array are less than or equal to elements of another array
-(define-fun leqPre ((a (Array Int Int)) (b (Array Int Int))) Bool
+ (define-fun leqPre ((a (Array Dim Int)) (b (Array Dim Int))) Bool
   (=
     ((_ map (<= (Int Int) Int)) a b)
-    ((as const (Array Int Bool)) true)
+    ((as const (Array Dim Bool)) true)
   )
 )
 
 ; Asserts that all elements of the array are less than elements of another array
-(define-fun ltPre ((a (Array Int Int)) (b (Array Int Int))) Bool
+ (define-fun ltPre ((a (Array Dim Int)) (b (Array Dim Int))) Bool
   (=
     ((_ map (< (Int Int) Int)) a b)
-    ((as const (Array Int Bool)) true)
+    ((as const (Array Dim Bool)) true)
   )
 )
 
-(define-fun validShape ((s (Array Int Int))) Bool
+ (define-fun validShape ((s (Array Dim Int))) Bool
   (leqPre zeroArr s)
 )
 
-(define-fun validAccess ((a (Array Int Int)) (s (Array Int Int))) Bool
+ (define-fun validAccess ((a (Array Dim Int)) (s (Array Dim Int))) Bool
   (and
     (leqPre zeroArr a)
     (ltPre a s)
@@ -56,15 +61,15 @@
   ; - ax1 is the non-iota axis, and hence has arbitrary size. Its size is represented as an array sz1
 
   (declare-const sz0 Int) ; Size of ax0
-  (declare-const sz1 (Array Int Int)) ; Size of ax1
+  (declare-const sz1 (Array Dim Int)) ; Size of ax1
   (declare-const a0 Int) ; Access for ax0
-  (declare-const a1 (Array Int Int))  ; Access for ax1
+  (declare-const a1 (Array Dim Int))  ; Access for ax1
 
-  (define-fun lhsShape () (Pair Int (Array Int Int))
+  (define-fun lhsShape () (Pair Int (Array Dim Int))
     (mk-pair sz0 sz1)
   )
 
-  (define-fun rhsShape () (Pair Int (Array Int Int))
+  (define-fun rhsShape () (Pair Int (Array Dim Int))
     (mk-pair sz0 sz1)
   )
 
