@@ -26,14 +26,14 @@
 ; Asserts that all elements of the array are less than or equal to elements of another array
 (define-fun leqPre0 ((a (Array Dim0 Int)) (b (Array Dim0 Int))) Bool
   (=
-    ((_ map (<= (Int Int) Int)) a b)
+    ((_ map (<= (Int Int) Bool)) a b)
     ((as const (Array Dim0 Bool)) true)
   )
 )
 
 (define-fun leqPre1 ((a (Array Dim1 Int)) (b (Array Dim1 Int))) Bool
   (=
-    ((_ map (<= (Int Int) Int)) a b)
+    ((_ map (<= (Int Int) Bool)) a b)
     ((as const (Array Dim1 Bool)) true)
   )
 )
@@ -41,14 +41,14 @@
 ; Asserts that all elements of the array are less than elements of another array
 (define-fun ltPre0 ((a (Array Dim0 Int)) (b (Array Dim0 Int))) Bool
   (=
-    ((_ map (< (Int Int) Int)) a b)
+    ((_ map (< (Int Int) Bool)) a b)
     ((as const (Array Dim0 Bool)) true)
   )
 )
 
 (define-fun ltPre1 ((a (Array Dim1 Int)) (b (Array Dim1 Int))) Bool
   (=
-    ((_ map (< (Int Int) Int)) a b)
+    ((_ map (< (Int Int) Bool)) a b)
     ((as const (Array Dim1 Bool)) true)
   )
 )
