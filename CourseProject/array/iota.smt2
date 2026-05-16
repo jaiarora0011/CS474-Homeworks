@@ -1,5 +1,5 @@
-; Declare a sort for dimension labels, one for each RClass.
-; This allows us to reason about shapes with symbolic dimension labels, instead of integer dimension numbers, which makes the shape arrays unbounded.
+; Declare a sort for dimension labels, one for each aggregated axis.
+; This allows us to reason about maps with symbolic dimension labels, instead of integer dimension numbers (which make the arrays unbounded).
 ; So all attribute arrays are now of type (Array Dim Int) instead of (Array Int Int).
 (declare-sort Dim 0)
 
@@ -54,6 +54,7 @@
 (declare-datatypes (T1 T2) ((Pair (mk-pair (first T1) (second T2)))))
 
 ;; Rewrites involving Tensor Iota
+;; Rules taken from https://github.com/ADAPT-uiuc/TensorRight/blob/master/rules/xla/iota/Main.hs
 (push)
   (echo "Verifying Iota(S, d) => Zero, when S[d] = 1")
   ; Rewrite involves two aggregated-axes: ax0, ax1

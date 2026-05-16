@@ -1,5 +1,5 @@
-; Declare a sort for dimension labels, one for each RClass.
-; This allows us to reason about shapes with symbolic dimension labels, instead of integer dimension numbers, which makes the shape arrays unbounded.
+; Declare a sort for dimension labels, one for each aggregated axis.
+; This allows us to reason about maps with symbolic dimension labels, instead of integer dimension numbers (which make the arrays unbounded).
 ; So all attribute arrays are now of type (Array Dim Int) instead of (Array Int Int).
 (declare-sort Dim 0)
 
@@ -52,6 +52,7 @@
 )
 
 ;; Rewrites involving Tensor Addition
+;; Rules taken from https://github.com/ADAPT-uiuc/TensorRight/blob/master/rules/xla/add/Main.hs
 (push)
   (echo "Verifying Add(Add(A, c1), c2) => Add(A, Add(c1, c2))")
   (declare-const c1 Real)

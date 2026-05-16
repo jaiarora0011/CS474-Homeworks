@@ -1,5 +1,5 @@
-; Declare a sort for dimension labels, one for each RClass.
-; This allows us to reason about shapes with symbolic dimension labels, instead of integer dimension numbers, which makes the shape arrays unbounded.
+; Declare a sort for dimension labels, one for each aggregated axis.
+; This allows us to reason about maps with symbolic dimension labels, instead of integer dimension numbers (which make the arrays unbounded).
 ; So all attribute arrays are now of type (Array Dim Int) instead of (Array Int Int).
 (declare-sort Dim 0)
 
@@ -117,6 +117,9 @@
 (pop)
 
 ;; Rewrites involving Tensor Slicing
+;; Rules taken from:
+;; - https://github.com/ADAPT-uiuc/TensorRight/blob/master/rules/xla/slice/Main.hs
+;; - https://github.com/ADAPT-uiuc/TensorRight/blob/master/rules/debug/Main.hs
 (push)
   (echo "Verifying Slice(A) => A")
   (declare-const sz (Array Dim Int)) ; Tensor size
@@ -287,6 +290,7 @@
   )
 
   (assert (not phi))
+  ; Expected to be satisfiable, since the rewrite is invalid for higher-dimensional cases
   (check-sat)
 (pop)
 

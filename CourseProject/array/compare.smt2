@@ -1,5 +1,5 @@
-; Declare a sort for dimension labels, one for each RClass.
-; This allows us to reason about shapes with symbolic dimension labels, instead of integer dimension numbers, which makes the shape arrays unbounded.
+; Declare a sort for dimension labels, one for each aggregated axis.
+; This allows us to reason about maps with symbolic dimension labels, instead of integer dimension numbers (which make the arrays unbounded).
 ; So all attribute arrays are now of type (Array Dim Int) instead of (Array Int Int).
 (declare-sort Dim 0)
 
@@ -52,6 +52,7 @@
 )
 
 ;; Rewrites involving Tensor Comparison
+;; Rules taken from https://github.com/ADAPT-uiuc/TensorRight/blob/master/rules/xla/compare/Main.hs
 (push)
   (echo "Verifying Gt(A, A) => False")
   (declare-const s (Array Dim Int))
