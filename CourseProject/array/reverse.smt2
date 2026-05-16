@@ -15,6 +15,14 @@
    ((as const (Array Dim1 Int)) 0)
 )
 
+(define-fun oneArr0 () (Array Dim0 Int)
+   ((as const (Array Dim0 Int)) 1)
+)
+
+(define-fun oneArr1 () (Array Dim1 Int)
+   ((as const (Array Dim1 Int)) 1)
+)
+
 ; Asserts that all elements of the array are less than or equal to elements of another array
 (define-fun leqPre0 ((a (Array Dim0 Int)) (b (Array Dim0 Int))) Bool
   (=
@@ -89,7 +97,7 @@
   )
 
   (define-fun precondition () Bool
-    (= sz zeroArr0)
+    (= sz oneArr0)
   )
 
   (define-fun lhsValid () Bool
